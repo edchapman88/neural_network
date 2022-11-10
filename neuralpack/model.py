@@ -1,5 +1,7 @@
 import numpy as np
 from typing import Callable
+import logging
+logger = logging.getLogger(__name__)
 
 
 class BaseLayer:
@@ -16,12 +18,12 @@ class BaseLayer:
 
 class DenseLayer(BaseLayer):
     def __init__(self,input_size,output_size):
-        # Y = W.X + B
-        # shapes (j,) = (j,i).(i,) + (j,)
         self.weights = np.random.randn(output_size,input_size)
         self.bias = np.random.randn(output_size,1)
 
     def forward(self, input):
+        # Y = W.X + B
+        # shapes (j,) = (j,i).(i,) + (j,)
         self.input = input
         return np.dot(self.weights,input) + self.bias
 
@@ -43,7 +45,7 @@ class DenseLayer(BaseLayer):
         return e_grad_in
 
 class ActivationLayer(BaseLayer):
-    def __init__(self, activation:Callable[[np.ndarray]], activation_prime:Callable[[np.ndarray]]):
+    def __init__(self, activation, activation_prime):
         self.activation = activation
         self.activation_prime = activation_prime
 
@@ -51,7 +53,7 @@ class ActivationLayer(BaseLayer):
         self.input = input
         return self.activation(input)
 
-    def backward(self, e_grad_out):
+    def backward(self, e_grad_out, learning_rate):
         '''
         dE/dW = dE/dY .(elemwise) f_prime(X)
         '''
@@ -64,13 +66,13 @@ class TanhLayer(ActivationLayer):
         super().__init__(tanh, tanh_prime)
 
 class ReluLayer(ActivationLayer):
-    def __init__():
+    def __init__(self):
         relu = lambda x: np.maximum(x,np.zeros_like(x))
-        relu_prime = lambda x: 0 if x <=0 else 1
+        relu_prime = lambda x: np.where(x<=0,0,1)
         super().__init__(relu, relu_prime)
 
 def mse(y_true,y_pred):
-    return np.mean(np.power(y_true - y_pred),2)
+    return np.mean(np.power((y_true - y_pred),2))
 
 def mse_prime(y_true,y_pred):
     return 2 * (y_pred - y_true) / np.size(y_true)
