@@ -1,47 +1,44 @@
-from neuralpack.model import DenseLayer,ReluLayer,mse,mse_prime
+from neuralpack.model import DenseLayer,ReluLayer,mse,mse_prime,SerialModel
 import numpy as np
 import logging
-import os
+from sample_generator import batch_generator, xor_sample_generator
+
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
+logger.setLevel(logging.DEBUG)
+console_handler = logging.StreamHandler()
+logger.addHandler(console_handler)
 
 
-X = np.reshape([[0,0],[0,1],[1,0],[1,1]], (4,2,1))
-Y = np.reshape([ 0,    1,    1,    0], (4,1,1))
+# X = np.reshape([[0,0],[0,1],[1,0],[1,1]], (4,2,1))
+# Y = np.reshape([1,0,0,1], (4,1,1))
 
-model = [
+model = SerialModel(layers=[
     DenseLayer(input_size=2, output_size=3),
     ReluLayer(),
-    DenseLayer(input_size=3, output_size=1)
-]
+    DenseLayer(input_size=3, output_size=2),
+    ReluLayer(),
+    DenseLayer(input_size=2, output_size=1)
+])
 
-n_epochs = 20
-error_record = []
-
-for epoch in range(n_epochs):
-    logger.info(f'epoch: {epoch}')
-    sum_error_epoch = 0
-
-    for i,sample in enumerate(X):
-
-        output = sample
-        for layer in model:
-            output = layer.forward(input=output)
-
-        error = mse(y_true=Y[i], y_pred=output)
-        sum_error_epoch += error
-
-        e_grad_out = mse_prime(y_true=Y[i], y_pred=output)
-
-        for layer in reversed(model):
-            e_grad_in = layer.backward(e_grad_out=e_grad_out, learning_rate=0.1)
-            e_grad_out = e_grad_in
-
-    error_record.append(sum_error_epoch)
+n_batches = 3000
+xor_generator = xor_sample_generator(rnd_seed=1)
+xor_batch_generator = batch_generator(batch_size=8,sample_generator=xor_generator)
 
 
+batch_errors = []
+for b in range(n_batches):
+    X,Y = next(xor_batch_generator)
+    batch_error = model.train(batch_X=X, batch_Y=Y, learning_rate=0.0001)
+    batch_errors.append(batch_error)
+
+
+print(model.predict(np.reshape([0,0], (2,1))))
+print(model.predict(np.reshape([0,1], (2,1))))
+print(model.predict(np.reshape([1,0], (2,1))))
+print(model.predict(np.reshape([1,1], (2,1))))
 
 import matplotlib.pyplot as plt
-plt.plot(error_record)
+plt.plot(batch_errors)
+# plt.ylim(0,1)
 plt.show()
 

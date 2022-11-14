@@ -2,7 +2,69 @@ import numpy as np
 from typing import Callable
 import logging
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+console_handler = logging.StreamHandler()
+logger.addHandler(console_handler)
 
+class SerialModel:
+    def __init__(self, layers:list):
+        self.layers = layers
+
+    def predict(self, X:np.ndarray):
+        input = X
+        for layer in self.layers:
+            output = layer.forward(input=input)
+            input = output
+        return output
+
+    def train(self, batch_X:np.ndarray, batch_Y:np.ndarray, learning_rate:float):
+        '''
+        Train the network on a batch of data.
+        
+        Passing a batch consisting of one data
+        point is equivlent to stocastic gradient descent. Otherwise "mini-batch"
+        gradient descent is used. The network weights are updated once with a mean
+        error gradient calculated across the batch.
+
+        PARAMETERS:
+        batch_X (np.ndarray(shape[batch_size, num_model_inputs, 1])): A batch of model inputs.
+        batch_Y (np.ndarray(shape[batch_size, num_model_outputs, 1])): A batch of expected model outputs
+        learning_rate (float): Step size during gradient descent.
+
+        RETURNS:
+        mean_batch_error (float): Mean Squared Error calculated across the batch during training.
+        '''
+
+        error_sum = 0
+        error_grad_sum = 0
+        for i in range(batch_X.shape[0]):
+            x = batch_X[i,:,:]
+            y = batch_Y[i,:]
+            logger.info(f'batch size: {batch_X.shape[0]}')
+            logger.info(f'x = {x}')
+            logger.info(f'y = {y}')
+            y_pred = self.predict(x)
+            logger.info(f'y_pred = {y_pred}')
+            error = mse(y_true=y, y_pred=y_pred)
+            logger.info(f'error = {error}')
+            error_sum += error
+            error_grad = mse_prime(y_true=y,y_pred=y_pred)
+            logger.info(f'error_grad = {error_grad}')
+            error_grad_sum += error_grad
+
+        mean_batch_error = error_sum / batch_X.shape[0]
+        # mean_batch_error_grad 
+        e_grad_out = error_grad_sum / batch_X.shape[0]
+        logger.info(f'e_grad_out = {e_grad_out}')
+
+        for layer in reversed(self.layers):
+            e_grad_in = layer.backward(e_grad_out=e_grad_out, learning_rate=learning_rate)
+            e_grad_out = e_grad_in
+
+        return mean_batch_error
+        
+
+            
 
 class BaseLayer:
     def __init__(self):
@@ -72,9 +134,9 @@ class ReluLayer(ActivationLayer):
         super().__init__(relu, relu_prime)
 
 def mse(y_true,y_pred):
-    return np.mean(np.power((y_true - y_pred),2))
+    return np.mean(np.power(np.subtract(y_true,y_pred),2))
 
 def mse_prime(y_true,y_pred):
-    return 2 * (y_pred - y_true) / np.size(y_true)
+    return 2 * np.subtract(y_pred,y_true) / np.size(y_true)
         
 
