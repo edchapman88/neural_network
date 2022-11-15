@@ -2,6 +2,7 @@ from neuralpack.model import DenseLayer,ReluLayer,mse,mse_prime,SerialModel
 import numpy as np
 import logging
 from sample_generator import batch_generator, xor_sample_generator
+import math
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -13,16 +14,19 @@ logger.addHandler(console_handler)
 # Y = np.reshape([1,0,0,1], (4,1,1))
 
 model = SerialModel(layers=[
-    DenseLayer(input_size=2, output_size=3),
+    DenseLayer(input_size=2, output_size=5),
     ReluLayer(),
-    DenseLayer(input_size=3, output_size=2),
+    DenseLayer(input_size=5, output_size=5),
     ReluLayer(),
-    DenseLayer(input_size=2, output_size=1)
+    DenseLayer(input_size=5, output_size=1)
 ])
 
-n_batches = 3000
+n_samples = 100000
+batch_size = 64
+
+n_batches = math.ceil(n_samples/batch_size)
 xor_generator = xor_sample_generator(rnd_seed=1)
-xor_batch_generator = batch_generator(batch_size=8,sample_generator=xor_generator)
+xor_batch_generator = batch_generator(batch_size=64,sample_generator=xor_generator)
 
 
 batch_errors = []

@@ -40,22 +40,15 @@ class SerialModel:
         for i in range(batch_X.shape[0]):
             x = batch_X[i,:,:]
             y = batch_Y[i,:]
-            logger.info(f'batch size: {batch_X.shape[0]}')
-            logger.info(f'x = {x}')
-            logger.info(f'y = {y}')
             y_pred = self.predict(x)
-            logger.info(f'y_pred = {y_pred}')
             error = mse(y_true=y, y_pred=y_pred)
-            logger.info(f'error = {error}')
             error_sum += error
             error_grad = mse_prime(y_true=y,y_pred=y_pred)
-            logger.info(f'error_grad = {error_grad}')
             error_grad_sum += error_grad
 
         mean_batch_error = error_sum / batch_X.shape[0]
         # mean_batch_error_grad 
         e_grad_out = error_grad_sum / batch_X.shape[0]
-        logger.info(f'e_grad_out = {e_grad_out}')
 
         for layer in reversed(self.layers):
             e_grad_in = layer.backward(e_grad_out=e_grad_out, learning_rate=learning_rate)
