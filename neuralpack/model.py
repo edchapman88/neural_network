@@ -1,10 +1,13 @@
 import numpy as np
+import math
 from typing import Callable
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 console_handler = logging.StreamHandler()
 logger.addHandler(console_handler)
+
+np_rng = np.random.default_rng()
 
 class SerialModel:
     def __init__(self, layers:list):
@@ -73,8 +76,10 @@ class BaseLayer:
 
 class DenseLayer(BaseLayer):
     def __init__(self,input_size,output_size):
-        self.weights = np.random.randn(output_size,input_size)
-        self.bias = np.random.randn(output_size,1)
+        # use Xavier normal initializer
+        std = math.sqrt(2 / (input_size + output_size))
+        self.weights = np_rng.normal(loc=0, scale=std, size=(output_size,input_size))
+        self.bias = np.zeros(shape=(output_size,1))
 
     def forward(self, input):
         # Y = W.X + B
