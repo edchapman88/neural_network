@@ -14,16 +14,16 @@ model = SerialModel(layers=[
 trainer = Trainer(model=model,sample_generator_func=xor_data_generator_func)
 
 # in this case one epoch is only 4 samples.
-batch_errors = trainer.run(batch_size=1,epochs=1,learning_rate=0.1)
+# batch_errors = trainer.run(batch_size=1,epochs=1,learning_rate=0.1)
 
 # plot errors over training run
-plt.plot(batch_errors)
-plt.show()
+# plt.plot(batch_errors)
+# plt.show()
 
-plot_xor_decision_boundary(model)
+# plot_xor_decision_boundary(model)
 
 # do more training
-batch_errors = trainer.run(batch_size=3,epochs=1000,learning_rate=0.1)
+batch_errors = trainer.run(batch_size=1,epochs=5000,learning_rate=0.0001)
 plt.plot(batch_errors)
 plt.show()
 plot_xor_decision_boundary(model)

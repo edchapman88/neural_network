@@ -76,8 +76,8 @@ class BaseLayer:
 
 class DenseLayer(BaseLayer):
     def __init__(self,input_size,output_size):
-        # use Xavier normal initializer
-        std = math.sqrt(2 / (input_size + output_size))
+        # use He normal initializer (optimised for ReLu activation layers)
+        std = math.sqrt(2 / input_size)
         self.weights = np_rng.normal(loc=0, scale=std, size=(output_size,input_size))
         self.bias = np.zeros(shape=(output_size,1))
 

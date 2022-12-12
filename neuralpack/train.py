@@ -2,6 +2,7 @@ from neuralpack.model import SerialModel
 from typing import Callable, Iterator
 import numpy as np
 import logging
+from tqdm import tqdm
 
 logger  = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -19,7 +20,7 @@ class Trainer:
         self.batch_itr = self.batch_generator(batch_size,self.sample_itr)
         batch_errors = []
         
-        for epoch in range(1, epochs+1):
+        for epoch in tqdm(range(1, epochs+1),desc='Epochs'):
             epoch_errors = []
             while True:
                 try:
@@ -36,7 +37,7 @@ class Trainer:
                 batch_errors.append(batch_error)
                 epoch_errors.append(batch_error)
 
-            logger.info(f'Epoch {epoch} complete with mean error: {sum(epoch_errors)/len(epoch_errors)} ')
+            # logger.info(f'Epoch {epoch} complete with mean error: {sum(epoch_errors)/len(epoch_errors)} ')
 
         return batch_errors
 
