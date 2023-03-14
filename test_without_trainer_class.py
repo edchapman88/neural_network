@@ -17,6 +17,10 @@ model = SerialModel(layers=[
     ReluLayer(),
     DenseLayer(input_size=5, output_size=5),
     ReluLayer(),
+    DenseLayer(input_size=5, output_size=5),
+    ReluLayer(),
+    DenseLayer(input_size=5, output_size=5),
+    ReluLayer(),
     DenseLayer(input_size=5, output_size=1)
 ])
 
